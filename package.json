@@ -15,8 +15,11 @@
   "homepage": "https://cesiumjs.org",
   "license": "Apache-2.0",
   "dependencies": {
+    "bootstrap": "^4.5.3",
     "cesium": "^1.63.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "jquery": "^3.5.1",
+    "popper.js": "^1.16.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^6.0.3",
