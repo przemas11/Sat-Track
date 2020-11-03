@@ -1,11 +1,29 @@
 <html>
-	<head>
-		<meta charset="utf-8">
-	  	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	  	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-		<title>Cesium + Webpack</title>
-	</head>
-	<body>
-		<div id="cesiumContainer"></div>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>SatTrack</title>
+		<link rel="icon" type="image/png" href="favicon.png"/>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+    <div id="buttons" style="visibility: hidden;">
+      <button class="btn btn-dark" type="button" id="btn1">load czml</button>
+			<button class="btn btn-dark" type="button" id="btn2">test</button>
+
+			<div class="custom-control custom-switch">
+				<input type="checkbox" class="custom-control-input" id="sw1">
+				<label class="custom-control-label" for="sw1">Oświetlenie</label>
+			</div>
+			<div class="custom-control custom-switch">
+				<input type="checkbox" class="custom-control-input" id="sw2">
+				<label class="custom-control-label" for="sw2">Blokada kamery</label>
+      </div>
+      
+    </div>
+  </body>
 </html>
