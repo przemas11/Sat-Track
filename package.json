@@ -1,25 +1,27 @@
 {
-  "name": "cesium-webpack-example",
+  "name": "sat-track",
   "version": "1.0.0",
   "description": "The minimal recomended setup for an app using Cesium with Webpack.",
   "main": "index.js",
   "keywords": [
     "cesium",
     "webpack",
-    "example"
+    "satellite",
+    "tracker"
   ],
   "author": {
-    "name": "Cesium GS, Inc.",
-    "url": "https://cesium.com"
+    "name": "Przemas1111",
+    "url": "https://github.com/przemas1111"
   },
-  "homepage": "https://cesiumjs.org",
+  "homepage": "https://github.com/przemas1111",
   "license": "Apache-2.0",
   "dependencies": {
     "bootstrap": "^4.5.3",
     "cesium": "^1.63.1",
     "dotenv": "^8.2.0",
     "jquery": "^3.5.1",
-    "popper.js": "^1.16.1"
+    "popper.js": "^1.16.1",
+    "satellite.js": "^4.1.2"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^6.0.3",
