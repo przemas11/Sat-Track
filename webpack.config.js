@@ -32,8 +32,11 @@ module.exports = [{
             test: /\.css$/,
             use: ['style-loader', 'css-loader']
         }, {
-            test: /\.(png|gif|jpg|jpeg|svg|xml|json)$/,
+            test: /\.(xml|json)$/,
             use: ['url-loader']
+        }, {
+            test: /\.(png|jpg|jpeg|gif|svg)$/,
+            loader: 'file-loader'
         }]
     },
     plugins: [
