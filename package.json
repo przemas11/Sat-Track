@@ -27,7 +27,9 @@
     "copy-webpack-plugin": "^6.0.3",
     "css-loader": "^3.2.0",
     "dotenv-webpack": "^4.0.0",
+    "file-loader": "^6.2.0",
     "html-webpack-plugin": "^3.2.0",
+    "nodemon": "^2.0.6",
     "strip-pragma-loader": "^1.0.0",
     "style-loader": "^1.0.0",
     "uglifyjs-webpack-plugin": "^2.2.0",
@@ -40,6 +42,7 @@
     "build": "node_modules/.bin/webpack --config webpack.config.js",
     "start": "node_modules/.bin/webpack-dev-server --config webpack.config.js",
     "release": "node_modules/.bin/webpack --config webpack.release.config.js",
-    "serve-release": "node_modules/.bin/webpack-dev-server --config webpack.release.config.js --content-base /dist"
+    "serve-release": "node_modules/.bin/webpack-dev-server --config webpack.release.config.js --content-base /dist",
+    "server": "nodemon api/server.js"
   }
 }
