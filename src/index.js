@@ -10,6 +10,9 @@ import {
     Color,
     JulianDate,
     getTimestamp,
+    ImageryProvider,
+    ProviderViewModel,
+    IonImageryProvider
 } from 'cesium';
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./css/main.css";
@@ -23,19 +26,29 @@ import 'bootstrap/dist/js/bootstrap.min.js';
 const satellite = require('satellite.js');
 
 //INIT
-Ion.defaultAccessToken = process.env.ACCESS_TOKEN;
-Camera.DEFAULT_VIEW_RECTANGLE = Rectangle.fromDegrees(-60, -40, 60, 80)
+Ion.defaultAccessToken = process.env.ACCESS_TOKEN; //token needed only to access Bing imagery
+Camera.DEFAULT_VIEW_RECTANGLE = Rectangle.fromDegrees(-60, -40, 60, 80); //sets default view
 
-const viewer = new Viewer('cesiumContainer', {
+const viewer = new Viewer('cesiumContainer', { //create viewer
+    geocoder: false, //disables search bar
+    navigationInstructionsInitiallyVisible: false, //disables instructions on start
     shouldAnimate: true,
 });
 
+const viewModel = viewer.baseLayerPicker.viewModel; //remove Bing imagery
+viewModel.imageryProviderViewModels = viewModel.imageryProviderViewModels.filter((el) => {
+    return el.category !== "Cesium ion";
+});
+viewModel.selectedImagery = viewModel.imageryProviderViewModels[0]; //select default imageryProvider
+
+const scene = viewer.scene;
 const globe = viewer.scene.globe;
+//change lighting parameters
 globe.nightFadeInDistance = 20000000;
 globe.nightFadeOutDistance = 10000000;
 document.getElementById("buttons").style.visibility = "visible";
-const points = viewer.entities.values;
-let satUpdateIntervalTime = 33; //interval in ms
+const points = viewer.entities.values; //satellites marker points array
+let satUpdateIntervalTime = 33; //update interval in ms
 
 //============================================================
 
@@ -104,25 +117,19 @@ var geodeticCoords = satellite.eciToGeodetic(posvel.position, gmst);
 viewer.entities.add({
     name: tle0,
     position: Cartesian3.fromRadians(geodeticCoords.longitude, geodeticCoords.latitude, geodeticCoords.height * 1000),
-
     point: {
         pixelSize: 10,
         color: Color.YELLOW,
     },
 });
 
-// console.log(points);
-
 const updateSatellites = () => { //updates satellites
     posvel = satellite.propagate(satrec, JulianDate.toDate(viewer.clock.currentTime));
     gmst = satellite.gstime(JulianDate.toDate(viewer.clock.currentTime));
     geodeticCoords = satellite.eciToGeodetic(posvel.position, gmst);
     points[0].position = Cartesian3.fromRadians(geodeticCoords.longitude, geodeticCoords.latitude, geodeticCoords.height * 1000);
-
-    console.log(getTimestamp());
 };
 
-// viewer.clock.onTick.addEventListener(updateSatellites); //enables satellites positions update
 const satUpdateInterval = setInterval(updateSatellites, satUpdateIntervalTime); //enables satellites positions update
 viewer.scene.postUpdate.addEventListener(icrf); //enables camera lock at start
 viewer.camera.changed.addEventListener((camera) => { //enable camera lock after zoom
