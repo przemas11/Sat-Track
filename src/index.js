@@ -5,14 +5,15 @@ import {
     Rectangle,
     SceneMode,
     Transforms,
-    Matrix3,
     Matrix4,
     Cartesian3,
     Color,
     Material,
     JulianDate,
     PolylineCollection,
+    FrameRateMonitor,
 } from 'cesium';
+
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./css/main.css";
 
@@ -31,11 +32,14 @@ Camera.DEFAULT_VIEW_RECTANGLE = Rectangle.fromDegrees(-60, -40, 60, 80); //sets 
 
 const viewer = new Viewer('cesiumContainer', { //create viewer
     geocoder: false, //disables search bar
+    infoBox: false,
     navigationInstructionsInitiallyVisible: false, //disables instructions on start
+    sceneModePicker: false, //disables scene mode picker
     shouldAnimate: true,
 });
 
-const viewModel = viewer.baseLayerPicker.viewModel; //remove Bing imagery
+//remove Bing imagery
+const viewModel = viewer.baseLayerPicker.viewModel;
 viewModel.imageryProviderViewModels = viewModel.imageryProviderViewModels.filter((el) => {
     return el.category !== "Cesium ion";
 });
@@ -43,24 +47,30 @@ viewModel.selectedImagery = viewModel.imageryProviderViewModels[0]; //select def
 
 const scene = viewer.scene;
 const globe = viewer.scene.globe;
+const clock = viewer.clock;
+const entities = viewer.entities;
+const frameRateMonitor = new FrameRateMonitor({ scene: viewer.scene, quietPeriod: 0 });
 
 //polylines
 const polylines = new PolylineCollection(); //collection for displaying orbits
-viewer.scene.primitives.add(polylines);
+scene.primitives.add(polylines);
 
 //change lighting parameters
-globe.nightFadeInDistance = 20000000;
+globe.nightFadeInDistance = 40000000;
 globe.nightFadeOutDistance = 10000000;
-document.getElementById("buttons").style.visibility = "visible";
-const points = viewer.entities.values; //satellites marker points array
+
+document.getElementById("buttons").style.visibility = "visible"; //makes buttons visible after loading javascript
 let satUpdateIntervalTime = 33; //update interval in ms
+const orbitSteps = 6; //number of steps in predicted orbit
+
+const satellitesData = []; //currently displayed satellites TLE data (name, satrec)
 
 //============================================================
 
 // button1
 document.getElementById("btn1").onclick = () => {
     console.log('btn1');
-    calculateOrbit();
+    calculateOrbit(sat);
 }
 
 // button2
@@ -72,9 +82,9 @@ document.getElementById("btn2").onclick = () => {
 const sw1 = document.getElementById("sw1");
 document.getElementById("sw1").onclick = () => {
     if (sw1.checked) {
-        viewer.scene.globe.enableLighting = true;
+        globe.enableLighting = true;
     } else {
-        viewer.scene.globe.enableLighting = false;
+        globe.enableLighting = false;
     }
 }
 
@@ -90,11 +100,11 @@ sw2.onclick = () => {
 
 //camera lock functions
 const disableCamIcrf = () => { //locks camera on the globe
-    viewer.scene.postUpdate.removeEventListener(cameraIcrf);
+    scene.postUpdate.removeEventListener(cameraIcrf);
     viewer.camera.lookAtTransform(Matrix4.IDENTITY);
 }
 const enableCamIcrf = () => { //locks camera in space
-    viewer.scene.postUpdate.addEventListener(cameraIcrf);
+    scene.postUpdate.addEventListener(cameraIcrf);
 }
 const cameraIcrf = (scene, time) => {
     if (scene.mode !== SceneMode.SCENE3D) {
@@ -109,71 +119,63 @@ const cameraIcrf = (scene, time) => {
     }
 }
 //lock orbit in space
-const orbitIcrf = () => {
-    let currentTime = viewer.clock.currentTime;
+const orbitIcrf = (scene, time) => {
     if (polylines.length) {
-        let mat = Transforms.computeTemeToPseudoFixedMatrix(currentTime);
+        let mat = Transforms.computeTemeToPseudoFixedMatrix(time);
         polylines.modelMatrix = Matrix4.fromRotationTranslation(mat);
-
-        console.log('tick');
     }
 }
 
 //TESTING
-var tle0 = 'STARLINK-80';
-var tle1 = '1 44282U 19029AZ  20318.68146104  .00009418  00000-0  36419-3 0  9993';
-var tle2 = '2 44282  53.0238 202.3986 0003420   8.8438 351.2619 15.26909216 80818';
-// var tle0 = 'ISS (ZARYA)';
-// var tle1 = '1 25544U 98067A   20320.04640396 -.00008984  00000-0 -15498-3 0  9990';
-// var tle2 = '2 25544  51.6454 321.9942 0001595  43.4454  61.6326 15.49025312255403';
+const tle0 = 'STARLINK-80';
+const tle1 = '1 44282U 19029AZ  20318.68146104  .00009418  00000-0  36419-3 0  9993';
+const tle2 = '2 44282  53.0238 202.3986 0003420   8.8438 351.2619 15.26909216 80818';
+const sat = new Array(tle0, tle1, tle2);
+satellitesData.push(new Array(tle0, satellite.twoline2satrec(tle1, tle2)));
+//THE END OF TESTING SECTION
 
-var satrec = satellite.twoline2satrec(tle1, tle2);
+const addSatelliteMarker = ([satName, satrec]) => {
+    const posvel = satellite.propagate(satrec, JulianDate.toDate(clock.currentTime));
+    const gmst = satellite.gstime(JulianDate.toDate(clock.currentTime));
+    const pos = Object.values(satellite.eciToEcf(posvel.position, gmst)).map(el => el *= 1000); //position km->m
 
-var posvel = satellite.propagate(satrec, JulianDate.toDate(viewer.clock.currentTime));
-var gmst = satellite.gstime(JulianDate.toDate(viewer.clock.currentTime));
-var geodeticCoords = satellite.eciToGeodetic(posvel.position, gmst);
-
-viewer.entities.add({
-    name: tle0,
-    position: Cartesian3.fromRadians(geodeticCoords.longitude, geodeticCoords.latitude, geodeticCoords.height * 1000),
-    point: {
-        pixelSize: 10,
-        color: Color.YELLOW,
-    },
-});
+    entities.add({
+        name: satName,
+        position: Cartesian3.fromArray(pos),
+        point: {
+            pixelSize: 10,
+            color: Color.YELLOW,
+        },
+    });
+}
 
 //ORBIT CALCULATION (TEST)
-const calculateOrbit = () => {
+const calculateOrbit = (tle) => {
     //init
-    let currentTime = viewer.clock.currentTime; //sets current time
+    const satrec = satellite.twoline2satrec(tle[1], tle[2]);
     let orbitPoints = []; //array for calculated points
-    let period = (2 * Math.PI) / satrec.no; // orbital period in minutes
-    let steps = 100; //number of steps/points
-    let timeStep = period / steps; //time interval between points on orbit
+    const period = (2 * Math.PI) / satrec.no; // orbital period in minutes
+    const timeStep = period / orbitSteps; //time interval between points on orbit
     let baseTime = new JulianDate(); //time of the first point
-    JulianDate.addMinutes(currentTime, -period / 2, baseTime); //sets base time to the half period ago
+    JulianDate.addMinutes(clock.currentTime, -period / 2, baseTime); //sets base time to the half period ago
     let tempTime = new JulianDate(); //temp date for calculations
-    let gmstTemp = satellite.gstime(JulianDate.toDate(currentTime)); //gstime for ECI->ECF conversion
 
     //calculate points in ECI coordinate frame
-    for (let i = 0; i < steps; i++) {
+    for (let i = 0; i < orbitSteps; i++) {
         JulianDate.addMinutes(baseTime, i * timeStep, tempTime);
         let posvelTemp = satellite.propagate(satrec, JulianDate.toDate(tempTime));
-        // let positionTemp = satellite.eciToEcf(posvelTemp.position, gmstTemp);
-        let positionTemp = posvelTemp.position;
-        orbitPoints.push(Cartesian3.fromArray(Object.values(positionTemp)));
+        orbitPoints.push(Cartesian3.fromArray(Object.values(posvelTemp.position)));
     }
 
     //convert coordinates from kilometers to meters
     orbitPoints.forEach((point) => Cartesian3.multiplyByScalar(point, 1000, point));
 
     //polyline material
-    let polylineMaterial = new Material.fromType('Color'); //create polyline material
+    const polylineMaterial = new Material.fromType('Color'); //create polyline material
     polylineMaterial.uniforms.color = Color.YELLOW; //set the material color
 
     polylines.removeAll();
     polylines.add({
-        loop: true,
         positions: orbitPoints,
         width: 1,
         material: polylineMaterial,
@@ -181,18 +183,37 @@ const calculateOrbit = () => {
     });
 };
 
-const updateSatellites = () => { //updates satellites
-    posvel = satellite.propagate(satrec, JulianDate.toDate(viewer.clock.currentTime));
-    gmst = satellite.gstime(JulianDate.toDate(viewer.clock.currentTime));
-    geodeticCoords = satellite.eciToGeodetic(posvel.position, gmst);
-    points[0].position = Cartesian3.fromRadians(geodeticCoords.longitude, geodeticCoords.latitude, geodeticCoords.height * 1000);
+// addSatelliteMarker(sat);
+addSatelliteMarker(satellitesData[0]);
+// calculateOrbit(sat); //test
+
+const updateSatellites = (satellites) => { //updates satellites positions
+    if (satellites.length) {
+        const gmst = satellite.gstime(JulianDate.toDate(clock.currentTime));
+        satellites.forEach(([satName, satrec], index) => { //update satellite entity position
+            const posvel = satellite.propagate(satrec, JulianDate.toDate(clock.currentTime));
+            const pos = Object.values(satellite.eciToEcf(posvel.position, gmst)).map(el => el *= 1000); //position km->m
+
+            entities.values[index].position = Cartesian3.fromArray(pos); //update satellite position
+        });
+    }
 };
 
-const satUpdateInterval = setInterval(updateSatellites, satUpdateIntervalTime); //enables satellites positions update
-viewer.scene.postUpdate.addEventListener(cameraIcrf); //enables camera lock at the start
-viewer.scene.postUpdate.addEventListener(orbitIcrf); //enables orbit lock at the start
-viewer.camera.changed.addEventListener((camera) => { //enable camera lock after zoom
-    if (viewer.scene.mode === SceneMode.SCENE3D) {
+//update selected satellite orbit -> todo
+
+const updateFPScounter = () => {
+    let fps = frameRateMonitor.lastFramesPerSecond;
+    if (fps) {
+        document.getElementById('fps').innerText = fps.toFixed(0).toString();
+    }
+}
+
+const satUpdateInterval = setInterval(updateSatellites, satUpdateIntervalTime, satellitesData); //enables satellites positions update
+const frameRateMonitorInterval = setInterval(updateFPScounter, 500);
+scene.postUpdate.addEventListener(cameraIcrf); //enables camera lock at the start
+scene.postUpdate.addEventListener(orbitIcrf); //enables orbit lock at the start
+viewer.camera.changed.addEventListener(() => { //enable camera lock after zoom
+    if (scene.mode === SceneMode.SCENE3D) {
         if (viewer.camera.getMagnitude() < 8000000) {
             disableCamIcrf();
             sw2.checked = true;
