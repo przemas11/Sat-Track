@@ -12,8 +12,8 @@
   <body>
     <div id="cesiumContainer"></div>
     <div id="buttons" style="visibility: hidden;">
-      <button class="btn btn-dark" type="button" id="btn1">button1</button>
-			<button class="btn btn-dark" type="button" id="btn2">button2</button>
+      <button class="cesium-button" type="button" id="btn1">button1</button>
+			<button class="cesium-button" type="button" id="btn2">button2</button>
 
 			<div class="custom-control custom-switch">
 				<input type="checkbox" class="custom-control-input" id="sw1">
@@ -23,7 +23,8 @@
 				<input type="checkbox" class="custom-control-input" id="sw2">
 				<label class="custom-control-label" for="sw2">Blokada kamery</label>
       </div>
-      
+
+      <div id="fps-counter" class="toolbar">FPS: <span id="fps"></span></div>
     </div>
   </body>
 </html>

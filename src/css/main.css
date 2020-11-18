@@ -8,6 +8,12 @@ body,
   overflow: hidden;
 }
 
+.toolbar {
+  background: rgba(42, 42, 42, 0.8);
+  position: fixed;
+  border-radius: 4px;
+}
+
 #buttons {
   display: block;
   position: absolute;
@@ -32,4 +38,13 @@ body,
 
 input[disabled]+label.custom-control-label {
   color: rgb(207, 207, 207) !important;
+}
+
+#fps-counter {
+  bottom: 40px;
+  right: 10px;
+  width: 100px;
+  padding-left: 10px;
+  color: red;
+  font-size: large;
 }
