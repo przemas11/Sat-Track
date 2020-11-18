@@ -6,12 +6,19 @@ import {
     SceneMode,
     Transforms,
     Matrix4,
+    Cartesian2,
     Cartesian3,
+    HorizontalOrigin,
+    VerticalOrigin,
     Color,
     Material,
     JulianDate,
     PolylineCollection,
     FrameRateMonitor,
+    ScreenSpaceEventHandler,
+    ScreenSpaceEventType,
+    defaultValue,
+    Entity,
 } from 'cesium';
 
 import "cesium/Build/Cesium/Widgets/widgets.css";
@@ -36,9 +43,10 @@ const viewer = new Viewer('cesiumContainer', { //create viewer
     navigationInstructionsInitiallyVisible: false, //disables instructions on start
     sceneModePicker: false, //disables scene mode picker
     shouldAnimate: true,
+    selectionIndicator: false,
 });
 
-//remove Bing imagery
+//REMOVE BING IMAGERY
 const viewModel = viewer.baseLayerPicker.viewModel;
 viewModel.imageryProviderViewModels = viewModel.imageryProviderViewModels.filter((el) => {
     return el.category !== "Cesium ion";
@@ -51,7 +59,7 @@ const clock = viewer.clock;
 const entities = viewer.entities;
 const frameRateMonitor = new FrameRateMonitor({ scene: viewer.scene, quietPeriod: 0 });
 
-//polylines
+//POLYLINES
 const polylines = new PolylineCollection(); //collection for displaying orbits
 scene.primitives.add(polylines);
 
@@ -61,16 +69,37 @@ globe.nightFadeOutDistance = 10000000;
 
 document.getElementById("buttons").style.visibility = "visible"; //makes buttons visible after loading javascript
 let satUpdateIntervalTime = 33; //update interval in ms
-const orbitSteps = 6; //number of steps in predicted orbit
+const orbitSteps = 44; //number of steps in predicted orbit
 
 const satellitesData = []; //currently displayed satellites TLE data (name, satrec)
+let displayedOrbit = undefined; //displayed orbit data [satrec, refresh time in seconds]
+let lastOrbitUpdateTime = JulianDate.now();
 
-//============================================================
+//USER INPUT HANDLERS
+viewer.screenSpaceEventHandler.setInputAction((input) => { }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); //reset default doubleclick handler
+
+const handler = new ScreenSpaceEventHandler(scene.canvas); //custom event handler
+handler.setInputAction((input) => { //left click input action
+    let picked = scene.pick(input.position);
+    if (picked) {
+        let entity = defaultValue(picked.id, picked.primitive.id);
+        if (entity instanceof Entity) {
+            if (entity.label.show.getValue() === false) {
+                entity.label.show = true;
+                calculateOrbit(satellitesData.find(el => el[0] === entity.name)[1]);
+            } else {
+                entity.label.show = false;
+                clearOrbit();
+            }
+        }
+    }
+}, ScreenSpaceEventType.LEFT_CLICK);
+
+//===============================================================
 
 // button1
 document.getElementById("btn1").onclick = () => {
     console.log('btn1');
-    calculateOrbit(sat);
 }
 
 // button2
@@ -146,13 +175,21 @@ const addSatelliteMarker = ([satName, satrec]) => {
             pixelSize: 10,
             color: Color.YELLOW,
         },
+        label: {
+            show: false,
+            text: satName,
+            showBackground: true,
+            font: "16px monospace",
+            horizontalOrigin: HorizontalOrigin.LEFT,
+            verticalOrigin: VerticalOrigin.CENTER,
+            pixelOffset: new Cartesian2(10, 0),
+        },
     });
 }
 
-//ORBIT CALCULATION (TEST)
-const calculateOrbit = (tle) => {
+//ORBIT CALCULATION
+const calculateOrbit = (satrec) => {
     //init
-    const satrec = satellite.twoline2satrec(tle[1], tle[2]);
     let orbitPoints = []; //array for calculated points
     const period = (2 * Math.PI) / satrec.no; // orbital period in minutes
     const timeStep = period / orbitSteps; //time interval between points on orbit
@@ -161,7 +198,7 @@ const calculateOrbit = (tle) => {
     let tempTime = new JulianDate(); //temp date for calculations
 
     //calculate points in ECI coordinate frame
-    for (let i = 0; i < orbitSteps; i++) {
+    for (let i = 0; i <= orbitSteps; i++) {
         JulianDate.addMinutes(baseTime, i * timeStep, tempTime);
         let posvelTemp = satellite.propagate(satrec, JulianDate.toDate(tempTime));
         orbitPoints.push(Cartesian3.fromArray(Object.values(posvelTemp.position)));
@@ -181,11 +218,25 @@ const calculateOrbit = (tle) => {
         material: polylineMaterial,
         id: 'orbit'
     });
+
+    displayedOrbit = new Array(satrec, period * 30);
 };
 
-// addSatelliteMarker(sat);
+const clearOrbit = () => {
+    displayedOrbit = undefined;
+    polylines.removeAll();
+}
+
+const updateOrbit = () => {
+    if (displayedOrbit !== undefined) {
+        if (clock.currentTime.equalsEpsilon(lastOrbitUpdateTime, displayedOrbit[1]) === false) {
+            lastOrbitUpdateTime = clock.currentTime;
+            calculateOrbit(displayedOrbit[0]);
+        }
+    }
+}
+
 addSatelliteMarker(satellitesData[0]);
-// calculateOrbit(sat); //test
 
 const updateSatellites = (satellites) => { //updates satellites positions
     if (satellites.length) {
@@ -212,6 +263,7 @@ const satUpdateInterval = setInterval(updateSatellites, satUpdateIntervalTime, s
 const frameRateMonitorInterval = setInterval(updateFPScounter, 500);
 scene.postUpdate.addEventListener(cameraIcrf); //enables camera lock at the start
 scene.postUpdate.addEventListener(orbitIcrf); //enables orbit lock at the start
+scene.postUpdate.addEventListener(updateOrbit); //enables orbit update
 viewer.camera.changed.addEventListener(() => { //enable camera lock after zoom
     if (scene.mode === SceneMode.SCENE3D) {
         if (viewer.camera.getMagnitude() < 8000000) {
