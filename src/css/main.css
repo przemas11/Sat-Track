@@ -8,36 +8,71 @@ body,
   overflow: hidden;
 }
 
+div::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+div::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+div::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+div::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 .toolbar {
   background: rgba(42, 42, 42, 0.8);
   position: fixed;
   border-radius: 4px;
 }
 
-#buttons {
+#options {
   display: block;
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  padding: 50 50;
-  /* background-color: white; */
-}
-
-.btn:focus,
-.btn:active:focus,
-.btn.active:focus {
-  /* outline: none !important; */
-  box-shadow: none !important;
+  top: 10px;
+  left: 10px;
+  width: 260px;
+  color: white;
+  font-size: large;
+  padding: 20px;
 }
 
 .custom-switch {
-  margin: 10px 0 10px 0;
-  transform: scale(1.5);
+  /* margin: 10px 0 10px 0; */
+  user-select: none;
   color: white;
 }
 
-input[disabled]+label.custom-control-label {
+input[disabled] + label.custom-control-label {
   color: rgb(207, 207, 207) !important;
+}
+
+.rows button {
+  display: block;
+  position: relative;
+  width: 90%;
+  margin: 10px;
+}
+
+#buttons-entry-point {
+  max-height: 40vh;
+  overflow-y: scroll;
+}
+
+#progress-bar {
+  top: 3%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 30vw;
+  background-color: grey;
+}
+#bar {
+  width: 1%;
+  height: 30px;
+  background-color: green;
 }
 
 #fps-counter {
