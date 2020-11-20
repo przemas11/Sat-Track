@@ -1,22 +1,22 @@
 [
   {
     "name": "active",
-    "label": "Wszystkie aktywne satelity",
+    "label": "Wszystkie aktywne",
     "url": "http://www.celestrak.com/NORAD/elements/active.txt"
   },
   {
     "name": "brightest",
-    "label": "Najjaśniejsze satelity",
+    "label": "Najjaśniejsze",
     "url": "http://www.celestrak.com/NORAD/elements/visual.txt"
   },
   {
     "name": "weather",
-    "label": "Satelity meteorologiczne",
+    "label": "Meteorologiczne",
     "url": "http://www.celestrak.com/NORAD/elements/weather.txt"
   },
   {
     "name": "geosync",
-    "label": "Satelity geosynchorniczne",
+    "label": "Geosynchorniczne",
     "url": "http://www.celestrak.com/NORAD/elements/geo.txt"
   },
   {
