@@ -29,7 +29,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'jquery/dist/jquery.min.js';
 import 'popper.js/dist/umd/popper.min.js';
 import 'bootstrap/dist/js/bootstrap.min.js';
-require('./favicon.png');
 
 const satellite = require('satellite.js');
 
@@ -58,6 +57,9 @@ const globe = viewer.scene.globe;
 const clock = viewer.clock;
 const entities = viewer.entities;
 const frameRateMonitor = new FrameRateMonitor({ scene: viewer.scene, quietPeriod: 0 });
+viewer.homeButton.viewModel.duration = 1;
+let dataLoadingInProgress = false;
+let dataLoadingProgress = 0;
 
 //POLYLINES
 const polylines = new PolylineCollection(); //collection for displaying orbits
@@ -67,45 +69,35 @@ scene.primitives.add(polylines);
 globe.nightFadeInDistance = 40000000;
 globe.nightFadeOutDistance = 10000000;
 
-document.getElementById("buttons").style.visibility = "visible"; //makes buttons visible after loading javascript
+document.getElementById("ui").style.visibility = "visible"; //makes options visible after loading javascript
 let satUpdateIntervalTime = 33; //update interval in ms
 const orbitSteps = 44; //number of steps in predicted orbit
 
-const satellitesData = []; //currently displayed satellites TLE data (name, satrec)
+let satellitesData = []; //currently displayed satellites TLE data (name, satrec)
 let displayedOrbit = undefined; //displayed orbit data [satrec, refresh time in seconds]
 let lastOrbitUpdateTime = JulianDate.now();
 
-//USER INPUT HANDLERS
-viewer.screenSpaceEventHandler.setInputAction((input) => { }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); //reset default doubleclick handler
+//LINKS TO TLE DATA SOURCES
+import TLEsources from './TLEsources.json';
 
-const handler = new ScreenSpaceEventHandler(scene.canvas); //custom event handler
-handler.setInputAction((input) => { //left click input action
-    let picked = scene.pick(input.position);
-    if (picked) {
-        let entity = defaultValue(picked.id, picked.primitive.id);
-        if (entity instanceof Entity) {
-            if (entity.label.show.getValue() === false) {
-                entity.label.show = true;
-                calculateOrbit(satellitesData.find(el => el[0] === entity.name)[1]);
-            } else {
-                entity.label.show = false;
-                clearOrbit();
-            }
-        }
-    }
-}, ScreenSpaceEventType.LEFT_CLICK);
+//ADD SOURCES BUTTONS
+TLEsources.forEach((src) => {
+    const btnHTML = `<button class="cesium-button" type="button" name="enable-satellites">${src.label}</button>`;
+    const entry = document.getElementById('buttons-entry-point');
+    entry.insertAdjacentHTML('beforeend', btnHTML);
+});
 
 //===============================================================
-
-// button1
-document.getElementById("btn1").onclick = () => {
-    console.log('btn1');
+// disable satellites button
+document.getElementById("disable-satellites").onclick = () => {
+    deleteSatellites();
 }
 
-// button2
-document.getElementById("btn2").onclick = () => {
-    console.log('btn2');
-}
+// any enable satellites button
+document.getElementsByName("enable-satellites").forEach((el, i) => el.onclick = () => {
+    deleteSatellites();
+    getData(TLEsources[i].url);
+});
 
 //switch1
 const sw1 = document.getElementById("sw1");
@@ -125,6 +117,14 @@ sw2.onclick = () => {
     } else {
         enableCamIcrf();
     }
+}
+
+//deletes all satellites
+const deleteSatellites = () => {
+    satellitesData = [];
+    displayedOrbit = undefined;
+    polylines.removeAll();
+    entities.removeAll();
 }
 
 //camera lock functions
@@ -155,14 +155,6 @@ const orbitIcrf = (scene, time) => {
     }
 }
 
-//TESTING
-const tle0 = 'STARLINK-80';
-const tle1 = '1 44282U 19029AZ  20318.68146104  .00009418  00000-0  36419-3 0  9993';
-const tle2 = '2 44282  53.0238 202.3986 0003420   8.8438 351.2619 15.26909216 80818';
-const sat = new Array(tle0, tle1, tle2);
-satellitesData.push(new Array(tle0, satellite.twoline2satrec(tle1, tle2)));
-//THE END OF TESTING SECTION
-
 const addSatelliteMarker = ([satName, satrec]) => {
     const posvel = satellite.propagate(satrec, JulianDate.toDate(clock.currentTime));
     const gmst = satellite.gstime(JulianDate.toDate(clock.currentTime));
@@ -172,7 +164,7 @@ const addSatelliteMarker = ([satName, satrec]) => {
         name: satName,
         position: Cartesian3.fromArray(pos),
         point: {
-            pixelSize: 10,
+            pixelSize: 8,
             color: Color.YELLOW,
         },
         label: {
@@ -183,43 +175,51 @@ const addSatelliteMarker = ([satName, satrec]) => {
             horizontalOrigin: HorizontalOrigin.LEFT,
             verticalOrigin: VerticalOrigin.CENTER,
             pixelOffset: new Cartesian2(10, 0),
+            eyeOffset: Cartesian3.fromElements(0, 0, -10000),
         },
     });
 }
 
 //ORBIT CALCULATION
 const calculateOrbit = (satrec) => {
-    //init
-    let orbitPoints = []; //array for calculated points
-    const period = (2 * Math.PI) / satrec.no; // orbital period in minutes
-    const timeStep = period / orbitSteps; //time interval between points on orbit
-    let baseTime = new JulianDate(); //time of the first point
-    JulianDate.addMinutes(clock.currentTime, -period / 2, baseTime); //sets base time to the half period ago
-    let tempTime = new JulianDate(); //temp date for calculations
+    try {
+        //init
+        let orbitPoints = []; //array for calculated points
+        const period = (2 * Math.PI) / satrec.no; // orbital period in minutes
+        const timeStep = period / orbitSteps; //time interval between points on orbit
+        let baseTime = new JulianDate(); //time of the first point
+        JulianDate.addMinutes(clock.currentTime, -period / 2, baseTime); //sets base time to the half period ago
+        let tempTime = new JulianDate(); //temp date for calculations
 
-    //calculate points in ECI coordinate frame
-    for (let i = 0; i <= orbitSteps; i++) {
-        JulianDate.addMinutes(baseTime, i * timeStep, tempTime);
-        let posvelTemp = satellite.propagate(satrec, JulianDate.toDate(tempTime));
-        orbitPoints.push(Cartesian3.fromArray(Object.values(posvelTemp.position)));
+        //calculate points in ECI coordinate frame
+        for (let i = 0; i <= orbitSteps; i++) {
+            JulianDate.addMinutes(baseTime, i * timeStep, tempTime);
+            let posvelTemp = satellite.propagate(satrec, JulianDate.toDate(tempTime));
+            if (posvelTemp.position !== undefined) {
+                orbitPoints.push(Cartesian3.fromArray(Object.values(posvelTemp.position)));
+            }
+        }
+
+        //convert coordinates from kilometers to meters
+        orbitPoints.forEach((point) => Cartesian3.multiplyByScalar(point, 1000, point));
+
+        //polyline material
+        const polylineMaterial = new Material.fromType('Color'); //create polyline material
+        polylineMaterial.uniforms.color = Color.YELLOW; //set the material color
+
+        polylines.removeAll();
+        polylines.add({
+            positions: orbitPoints,
+            width: 1,
+            material: polylineMaterial,
+            id: 'orbit'
+        });
+
+        displayedOrbit = [satrec, period * 30];
+    } catch (error) {
+        console.log('This satellite is deorbited.');
     }
 
-    //convert coordinates from kilometers to meters
-    orbitPoints.forEach((point) => Cartesian3.multiplyByScalar(point, 1000, point));
-
-    //polyline material
-    const polylineMaterial = new Material.fromType('Color'); //create polyline material
-    polylineMaterial.uniforms.color = Color.YELLOW; //set the material color
-
-    polylines.removeAll();
-    polylines.add({
-        positions: orbitPoints,
-        width: 1,
-        material: polylineMaterial,
-        id: 'orbit'
-    });
-
-    displayedOrbit = new Array(satrec, period * 30);
 };
 
 const clearOrbit = () => {
@@ -236,21 +236,71 @@ const updateOrbit = () => {
     }
 }
 
-addSatelliteMarker(satellitesData[0]);
-
-const updateSatellites = (satellites) => { //updates satellites positions
-    if (satellites.length) {
+const updateSatellites = () => { //updates satellites positions
+    if (satellitesData.length && viewer.clockViewModel.shouldAnimate) {
         const gmst = satellite.gstime(JulianDate.toDate(clock.currentTime));
-        satellites.forEach(([satName, satrec], index) => { //update satellite entity position
-            const posvel = satellite.propagate(satrec, JulianDate.toDate(clock.currentTime));
-            const pos = Object.values(satellite.eciToEcf(posvel.position, gmst)).map(el => el *= 1000); //position km->m
+        satellitesData.forEach(([satName, satrec], index) => { //update satellite entity position
+            try {
+                const posvel = satellite.propagate(satrec, JulianDate.toDate(clock.currentTime));
+                const pos = Object.values(satellite.eciToEcf(posvel.position, gmst)).map(el => el *= 1000); //position km->m
 
-            entities.values[index].position = Cartesian3.fromArray(pos); //update satellite position
+                entities.values[index].position = Cartesian3.fromArray(pos); //update satellite position
+                entities.values[index].point.color = Color.YELLOW; //update point color
+            } catch (error) {
+                entities.values[index].point.color = Color.RED; //update point color
+            }
         });
     }
 };
 
-//update selected satellite orbit -> todo
+const setLoadingData = (bool) => { //shows loading bar
+    dataLoadingInProgress = bool;
+    // const loadingBar = document.getElementById("progress-bar");
+    // if (bool) {
+    //     loadingBar.style.visibility = "visible";
+    // } else {
+    //     loadingBar.style.visibility = "hidden";
+    // }
+}
+
+const getData = async (targetUrl) => { //get TLE data using CORS proxy
+    if (dataLoadingInProgress === false) {
+        setLoadingData(true);
+        const bar = document.getElementById("bar");        
+
+        const proxyUrl = 'https://cors-noproblem.herokuapp.com/';
+        const response = await fetch(proxyUrl + targetUrl);
+        let textLines = (await response.text()).split(/\r?\n/); //split file to separate lines
+        textLines = textLines.filter(e => { return e }); //delete empty lines at the eof
+
+        if (textLines.length) {
+            let tempSatellitesData = [];
+            //read file line by line
+            try {
+                for (let i = 0; i < textLines.length; i += 3) {
+                    //check if TLE texts length is correct
+                    if (textLines[i].length === 24 && textLines[i + 1].length === 69 && textLines[i + 2].length === 69) {
+                        let tempSatrec = satellite.twoline2satrec(textLines[i + 1], textLines[i + 2]);
+
+                        //check if TLE is valid
+                        if (satellite.propagate(tempSatrec, JulianDate.toDate(clock.currentTime)).position === undefined) {
+                            continue; //skips this loop iteration
+                        }
+                        tempSatellitesData.push([textLines[i].trim(), tempSatrec]);
+                    } else {
+                        throw `Error: The TLE data file can't be processed. The file may be corrupted.`
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+                setLoadingData(false);
+            }
+            tempSatellitesData.forEach(sat => addSatelliteMarker(sat)); //create point entities
+            satellitesData.push(...tempSatellitesData); //add satellites to updated satellites array
+        }
+        setLoadingData(false);
+    }
+}
 
 const updateFPScounter = () => {
     let fps = frameRateMonitor.lastFramesPerSecond;
@@ -259,19 +309,47 @@ const updateFPScounter = () => {
     }
 }
 
-const satUpdateInterval = setInterval(updateSatellites, satUpdateIntervalTime, satellitesData); //enables satellites positions update
+const checkCameraZoom = () => { //changes state of camera lock switch depending on camera zoom
+    setTimeout(() => {
+        if (scene.mode === SceneMode.SCENE3D) {
+            if (viewer.camera.getMagnitude() < 13000000) {
+                disableCamIcrf();
+                sw2.checked = true;
+                sw2.disabled = true;
+            } else {
+                sw2.disabled = false;
+            }
+        }
+    }, 10);
+}
+
+const satUpdateInterval = setInterval(updateSatellites, satUpdateIntervalTime); //enables satellites positions update
 const frameRateMonitorInterval = setInterval(updateFPScounter, 500);
 scene.postUpdate.addEventListener(cameraIcrf); //enables camera lock at the start
 scene.postUpdate.addEventListener(orbitIcrf); //enables orbit lock at the start
 scene.postUpdate.addEventListener(updateOrbit); //enables orbit update
-viewer.camera.changed.addEventListener(() => { //enable camera lock after zoom
-    if (scene.mode === SceneMode.SCENE3D) {
-        if (viewer.camera.getMagnitude() < 8000000) {
-            disableCamIcrf();
-            sw2.checked = true;
-            sw2.disabled = true;
-        } else {
-            sw2.disabled = false;
+// viewer.camera.changed.addEventListener(checkCameraZoom);
+
+//USER INPUT HANDLERS
+viewer.screenSpaceEventHandler.setInputAction((input) => { }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); //reset default doubleclick handler
+
+const handler = new ScreenSpaceEventHandler(scene.canvas); //custom event handler
+handler.setInputAction((input) => { //left click input action
+    let picked = scene.pick(input.position);
+    if (picked) {
+        let entity = defaultValue(picked.id, picked.primitive.id);
+        if (entity instanceof Entity) {
+            if (entity.label.show.getValue() === false) {
+                entity.label.show = true;
+                calculateOrbit(satellitesData.find(el => el[0] === entity.name)[1]);
+            } else {
+                entity.label.show = false;
+                clearOrbit();
+            }
         }
     }
-});
+}, ScreenSpaceEventType.LEFT_CLICK);
+
+handler.setInputAction((input) => { //mouse scroll
+    checkCameraZoom();
+}, ScreenSpaceEventType.WHEEL);
