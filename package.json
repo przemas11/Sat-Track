@@ -1,7 +1,7 @@
 {
   "name": "sat-track",
   "version": "1.0.0",
-  "description": "The minimal recomended setup for an app using Cesium with Webpack.",
+  "description": "Satellite tracker web app",
   "main": "index.js",
   "keywords": [
     "cesium",
@@ -10,10 +10,10 @@
     "tracker"
   ],
   "author": {
-    "name": "Przemas1111",
-    "url": "https://github.com/przemas1111"
+    "name": "Przemas11",
+    "url": "https://github.com/przemas11"
   },
-  "homepage": "https://github.com/przemas1111",
+  "homepage": "https://github.com/przemas11",
   "license": "Apache-2.0",
   "dependencies": {
     "bootstrap": "^4.5.3",
