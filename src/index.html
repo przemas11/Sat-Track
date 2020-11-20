@@ -7,21 +7,31 @@
       content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
     />
     <title>SatTrack</title>
-		<link rel="icon" type="image/png" href="favicon.png"/>
   </head>
   <body>
     <div id="cesiumContainer"></div>
-    <div id="buttons" style="visibility: hidden;">
-      <button class="cesium-button" type="button" id="btn1">button1</button>
-			<button class="cesium-button" type="button" id="btn2">button2</button>
+    
+    <div id="ui" style="visibility: hidden">
+      <div id="options" class="toolbar">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="sw1" />
+          <label class="custom-control-label" for="sw1">Oświetlenie</label>
+        </div>
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="sw2" />
+          <label class="custom-control-label" for="sw2">Blokada kamery</label>
+        </div>
 
-			<div class="custom-control custom-switch">
-				<input type="checkbox" class="custom-control-input" id="sw1">
-				<label class="custom-control-label" for="sw1">Oświetlenie</label>
-			</div>
-			<div class="custom-control custom-switch">
-				<input type="checkbox" class="custom-control-input" id="sw2">
-				<label class="custom-control-label" for="sw2">Blokada kamery</label>
+        <div class="rows">
+          <button class="cesium-button" type="button" id="disable-satellites">Wyłącz satelity</button>
+          <h4>Dostępne satelity:</h4>
+          <div id="buttons-entry-point">
+          </div>
+        </div>
+      </div>
+
+      <div id="progress-bar" class="toolbar" style="visibility: hidden">
+        <div id="bar"></div>
       </div>
 
       <div id="fps-counter" class="toolbar">FPS: <span id="fps"></span></div>
