@@ -32,16 +32,14 @@ module.exports = [{
             test: /\.css$/,
             use: ['style-loader', 'css-loader']
         }, {
-            test: /\.(xml|json)$/,
+            test: /\.(png|jpg|jpeg|gif|svg|xml)$/,
             use: ['url-loader']
-        }, {
-            test: /\.(png|jpg|jpeg|gif|svg)$/,
-            loader: 'file-loader'
         }]
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: 'src/index.html'
+            template: 'src/index.html',
+            favicon: './src/favicon.png'
         }),
         // Copy Cesium Assets, Widgets, and Workers to a static directory
         new CopyWebpackPlugin({
