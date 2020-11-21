@@ -12,7 +12,11 @@
     <div id="cesiumContainer"></div>
     
     <div id="ui" style="visibility: hidden">
-      <div id="options" class="toolbar">
+      <button class="cesium-button" type="button" id="menu-button" class="toolbar">
+        <i class="fa fa-bars"></i>
+      </button>
+
+      <div id="options" class="toolbar">  
         <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input" id="sw1" />
           <label class="custom-control-label" for="sw1">Oświetlenie</label>
@@ -36,5 +40,7 @@
 
       <div id="fps-counter" class="toolbar">FPS: <span id="fps"></span></div>
     </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script type="text/javascript" src="app.js"></script></body>
 </html>
