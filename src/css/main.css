@@ -28,22 +28,37 @@ div::-webkit-scrollbar-thumb:hover {
   background: rgba(42, 42, 42, 0.8);
   position: fixed;
   border-radius: 4px;
+  color: white;
+}
+
+#menu-button {
+  display: block;
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 20;
+  margin: 0;
+  padding: 0;
+  z-index: 2;
 }
 
 #options {
-  display: block;
-  top: 10px;
-  left: 10px;
+  display: none;
+  top: 44px;
+  left: 8px;
   width: 260px;
-  color: white;
   font-size: large;
   padding: 20px;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 51px);
+  z-index: 1;
 }
 
 .custom-switch {
   /* margin: 10px 0 10px 0; */
   user-select: none;
-  color: white;
 }
 
 input[disabled] + label.custom-control-label {

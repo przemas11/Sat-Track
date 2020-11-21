@@ -88,11 +88,17 @@ TLEsources.forEach((src) => {
 });
 
 //===============================================================
+//USER INTERFACE ACTIONS
+//menu button
+document.getElementById("menu-button").onclick = () => {
+    let o = document.getElementById("options");
+    o.style.display === "none" ? o.style.display = "block" : o.style.display = "none";
+}
+
 // disable satellites button
 document.getElementById("disable-satellites").onclick = () => {
     deleteSatellites();
 }
-
 // any enable satellites button
 document.getElementsByName("enable-satellites").forEach((el, i) => el.onclick = () => {
     deleteSatellites();
