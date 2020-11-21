@@ -1,0 +1,16 @@
+name: Publish the dist folder
+on:
+  push:
+    branches: [ master ]
+    paths: [ 'dist' ]
+  workflow_dispatch:
+  
+jobs:
+  copy-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Copy dist directory to the gh-pages branch
+        run: |
+          echo Pushing dist to the gh-pages branch.
+          echo git push origin `git subtree split --prefix dist master`:gh-pages --force
