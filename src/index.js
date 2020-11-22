@@ -92,9 +92,8 @@ TLEsources.forEach((src) => {
 //menu button
 document.getElementById("menu-button").onclick = () => {
     let o = document.getElementById("options");
-    o.style.display === "none" ? o.style.display = "block" : o.style.display = "none";
+    o.style.display === "block" ? o.style.display = "none" : o.style.display = "block";
 }
-
 // disable satellites button
 document.getElementById("disable-satellites").onclick = () => {
     deleteSatellites();
@@ -114,7 +113,6 @@ document.getElementById("sw1").onclick = () => {
         globe.enableLighting = false;
     }
 }
-
 //switch2
 const sw2 = document.getElementById("sw2");
 sw2.onclick = () => {

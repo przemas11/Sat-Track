@@ -1,7 +1,6 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
@@ -10,13 +9,19 @@
   </head>
   <body>
     <div id="cesiumContainer"></div>
-    
+
     <div id="ui" style="visibility: hidden">
-      <button class="cesium-button" type="button" id="menu-button" class="toolbar">
+      <button
+        class="cesium-button"
+        type="button"
+        id="menu-button"
+        class="toolbar"
+        title="Menu"
+      >
         <i class="fa fa-bars"></i>
       </button>
 
-      <div id="options" class="toolbar">  
+      <div id="options" class="toolbar">
         <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input" id="sw1" />
           <label class="custom-control-label" for="sw1">Oświetlenie</label>
@@ -27,10 +32,11 @@
         </div>
 
         <div class="rows">
-          <button class="cesium-button" type="button" id="disable-satellites">Wyłącz satelity</button>
+          <button class="cesium-button" type="button" id="disable-satellites">
+            Wyłącz satelity
+          </button>
           <h4>Dostępne satelity:</h4>
-          <div id="buttons-entry-point">
-          </div>
+          <div id="buttons-entry-point"></div>
         </div>
       </div>
 
@@ -41,6 +47,9 @@
       <div id="fps-counter" class="toolbar">FPS: <span id="fps"></span></div>
     </div>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
   </body>
 </html>

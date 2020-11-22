@@ -57,7 +57,6 @@ div::-webkit-scrollbar-thumb:hover {
 }
 
 .custom-switch {
-  /* margin: 10px 0 10px 0; */
   user-select: none;
 }
 
@@ -97,4 +96,5 @@ input[disabled] + label.custom-control-label {
   padding-left: 10px;
   color: red;
   font-size: large;
+  user-select: none;
 }
