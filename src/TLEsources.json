@@ -1,52 +1,62 @@
 [
   {
     "name": "active",
-    "label": "Wszystkie aktywne",
+    "label-pl": "Wszystkie aktywne",
+    "label-en": "All active",
     "url": "http://www.celestrak.com/NORAD/elements/active.txt"
   },
   {
     "name": "brightest",
-    "label": "Najjaśniejsze",
+    "label-pl": "Najjaśniejsze",
+    "label-en": "The brightest",
     "url": "http://www.celestrak.com/NORAD/elements/visual.txt"
   },
   {
     "name": "weather",
-    "label": "Meteorologiczne",
+    "label-pl": "Meteorologiczne",
+    "label-en": "Weather",
     "url": "http://www.celestrak.com/NORAD/elements/weather.txt"
   },
   {
     "name": "geosync",
-    "label": "Geosynchroniczne",
+    "label-pl": "Geosynchroniczne",
+    "label-en": "Geosynchronous",
     "url": "http://www.celestrak.com/NORAD/elements/geo.txt"
   },
   {
     "name": "iridiumNEXT",
-    "label": "IridiumNEXT",
+    "label-pl": "IridiumNEXT",
+    "label-en": "IridiumNEXT",
     "url": "http://www.celestrak.com/NORAD/elements/iridium-NEXT.txt"
   },
   {
     "name": "starlink",
-    "label": "Starlink",
+    "label-pl": "Starlink",
+    "label-en": "Starlink",
     "url": "http://www.celestrak.com/NORAD/elements/starlink.txt"
   },
   {
     "name": "gps",
-    "label": "GPS",
+    "label-pl": "GPS",
+    "label-en": "GPS",
     "url": "http://www.celestrak.com/NORAD/elements/gps-ops.txt"
   },
   {
     "name": "glonass",
-    "label": "GLONASS",
+    "label-pl": "GLONASS",
+    "label-en": "GLONASS",
     "url": "http://www.celestrak.com/NORAD/elements/glo-ops.txt"
   },
   {
     "name": "galileo",
-    "label": "Galileo",
+    "label-pl": "Galileo",
+    "label-en": "Galileo",
     "url": "http://www.celestrak.com/NORAD/elements/galileo.txt"
   },
   {
     "name": "beidou",
-    "label": "Beidou",
+    "label-pl": "Beidou",
+    "label-en": "Beidou",
     "url": "http://www.celestrak.com/NORAD/elements/beidou.txt"
   }
 ]

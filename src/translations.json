@@ -1,0 +1,20 @@
+[
+  {
+    "language": "pl",
+    "strings": [
+      { "id": "tr-lighting", "text": "Oświetlenie" },
+      { "id": "tr-camera-lock", "text": "Blokada kamery" },
+      { "id": "tr-disable-satellites", "text": "Usuń satelity" },
+      { "id": "tr-satellites-available", "text": "Dostępne satelity:" }
+    ]
+  },
+  {
+    "language": "en",
+    "strings": [
+      { "id": "tr-lighting", "text": "Lighting" },
+      { "id": "tr-camera-lock", "text": "Camera lock" },
+      { "id": "tr-disable-satellites", "text": "Remove satellites" },
+      { "id": "tr-satellites-available", "text": "Satellites available:" }
+    ]
+  }
+]

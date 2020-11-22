@@ -77,14 +77,30 @@ let satellitesData = []; //currently displayed satellites TLE data (name, satrec
 let displayedOrbit = undefined; //displayed orbit data [satrec, refresh time in seconds]
 let lastOrbitUpdateTime = JulianDate.now();
 
-//LINKS TO TLE DATA SOURCES
-import TLEsources from './TLEsources.json';
+//IMPORT DATA FROM JSON FILES
+import TLEsources from './TLEsources.json'; //TLE satellites data sources
+import translations from './translations.json'; //translations data
+
+//SET UI STRINGS DEPENDING ON BROWSER LANGUAGE
+const userLang = navigator.language.slice(0, 2) || navigator.userLanguage.slice(0, 2);
+if (userLang !== undefined) {
+    let translation = translations.find(tr => { return tr.language === userLang });
+    if (translation !== undefined) {
+        translation.strings.forEach((str) => {
+            document.getElementById(str.id).innerHTML = str.text;
+        });
+    }
+}
 
 //ADD SOURCES BUTTONS
+const btnsEntryPoint = document.getElementById('buttons-entry-point');
 TLEsources.forEach((src) => {
-    const btnHTML = `<button class="cesium-button" type="button" name="enable-satellites">${src.label}</button>`;
-    const entry = document.getElementById('buttons-entry-point');
-    entry.insertAdjacentHTML('beforeend', btnHTML);
+    let labelLang = 'label-en';
+    if (src[`label-${userLang}`] !== undefined) {
+        labelLang = `label-${userLang}`;
+    }
+    const btnHTML = `<button class="cesium-button" type="button" name="enable-satellites">${src[labelLang]}</button>`;
+    btnsEntryPoint.insertAdjacentHTML('beforeend', btnHTML);
 });
 
 //===============================================================
@@ -95,7 +111,7 @@ document.getElementById("menu-button").onclick = () => {
     o.style.display === "block" ? o.style.display = "none" : o.style.display = "block";
 }
 // disable satellites button
-document.getElementById("disable-satellites").onclick = () => {
+document.getElementById("tr-disable-satellites").onclick = () => {
     deleteSatellites();
 }
 // any enable satellites button
@@ -270,7 +286,7 @@ const setLoadingData = (bool) => { //shows loading bar
 const getData = async (targetUrl) => { //get TLE data using CORS proxy
     if (dataLoadingInProgress === false) {
         setLoadingData(true);
-        const bar = document.getElementById("bar");        
+        const bar = document.getElementById("bar");
 
         const proxyUrl = 'https://cors-noproblem.herokuapp.com/';
         const response = await fetch(proxyUrl + targetUrl);

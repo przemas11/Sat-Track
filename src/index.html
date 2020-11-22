@@ -24,18 +24,26 @@
       <div id="options" class="toolbar">
         <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input" id="sw1" />
-          <label class="custom-control-label" for="sw1">Oświetlenie</label>
+          <label class="custom-control-label" for="sw1" id="tr-lighting"
+            >Lighting</label
+          >
         </div>
         <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input" id="sw2" />
-          <label class="custom-control-label" for="sw2">Blokada kamery</label>
+          <label class="custom-control-label" for="sw2" id="tr-camera-lock"
+            >Camera lock</label
+          >
         </div>
 
         <div class="rows">
-          <button class="cesium-button" type="button" id="disable-satellites">
-            Wyłącz satelity
+          <button
+            class="cesium-button"
+            type="button"
+            id="tr-disable-satellites"
+          >
+          Remove satellites
           </button>
-          <h4>Dostępne satelity:</h4>
+          <h4 id="tr-satellites-available">Satellites available:</h4>
           <div id="buttons-entry-point"></div>
         </div>
       </div>
