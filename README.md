@@ -1,18 +1,10 @@
 # Sat-Track
+A simple web application displaying the location of selected satellites.
 
-A minimal recommended setup for an applications using [Cesium](https://cesium.com) with [Webpack](https://webpack.js.org/concepts/).
+It's using:
+* [Cesium](https://cesium.com)
+* [Webpack](https://webpack.js.org/)
+* [satellite-js](https://github.com/shashwatak/satellite-js)
 
-
-### Running this application
-
-	npm install
-	npm start
-
-Navigate to `localhost:8080`.
-
-##### Available scripts
-
-* `npm start` - Runs a webpack build with `webpack.config.js` and starts a development server
-* `npm run build` - Runs a webpack build with `webpack.config.js`
-* `npm run release` - Runs an optimized webpack build with `webpack.release.config.js`
-* `npm run serve-release` - Runs an optimized webpack build with `webpack.release.config.js` and starts a development server
+## Do you want to test it?
+The website is available at [this link](https://przemas11.github.io/Sat-Track/).
