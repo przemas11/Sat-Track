@@ -45,6 +45,9 @@ const viewer = new Viewer('cesiumContainer', { //create viewer
     selectionIndicator: false,
 });
 
+//API COLD START
+fetch("https://cors-noproblem.onrender.com/");
+
 //REMOVE BING IMAGERY
 const viewModel = viewer.baseLayerPicker.viewModel;
 viewModel.imageryProviderViewModels = viewModel.imageryProviderViewModels.filter((el) => {
@@ -288,7 +291,7 @@ const getData = async (targetUrl) => { //get TLE data using CORS proxy
         setLoadingData(true);
         const bar = document.getElementById("bar");
 
-        const proxyUrl = 'https://cors-noproblem.herokuapp.com/';
+        const proxyUrl = 'https://cors-noproblem.onrender.com/';
         const response = await fetch(proxyUrl + targetUrl);
         let textLines = (await response.text()).split(/\r?\n/); //split file to separate lines
         textLines = textLines.filter(e => { return e }); //delete empty lines at the eof
