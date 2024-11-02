@@ -3,60 +3,60 @@
     "name": "active",
     "label-pl": "Wszystkie aktywne",
     "label-en": "All active",
-    "url": "http://www.celestrak.com/NORAD/elements/active.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
   },
   {
     "name": "brightest",
     "label-pl": "Najjaśniejsze",
     "label-en": "The brightest",
-    "url": "http://www.celestrak.com/NORAD/elements/visual.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle"
   },
   {
     "name": "weather",
     "label-pl": "Meteorologiczne",
     "label-en": "Weather",
-    "url": "http://www.celestrak.com/NORAD/elements/weather.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=weather&FORMAT=tle"
   },
   {
     "name": "geosync",
     "label-pl": "Geosynchroniczne",
     "label-en": "Geosynchronous",
-    "url": "http://www.celestrak.com/NORAD/elements/geo.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=geo&FORMAT=tle"
   },
   {
     "name": "iridiumNEXT",
     "label-pl": "IridiumNEXT",
     "label-en": "IridiumNEXT",
-    "url": "http://www.celestrak.com/NORAD/elements/iridium-NEXT.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=iridium-NEXT&FORMAT=tle"
   },
   {
     "name": "starlink",
     "label-pl": "Starlink",
     "label-en": "Starlink",
-    "url": "http://www.celestrak.com/NORAD/elements/starlink.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle"
   },
   {
     "name": "gps",
     "label-pl": "GPS",
     "label-en": "GPS",
-    "url": "http://www.celestrak.com/NORAD/elements/gps-ops.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=tle"
   },
   {
     "name": "glonass",
     "label-pl": "GLONASS",
     "label-en": "GLONASS",
-    "url": "http://www.celestrak.com/NORAD/elements/glo-ops.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=glo-ops&FORMAT=tle"
   },
   {
     "name": "galileo",
     "label-pl": "Galileo",
     "label-en": "Galileo",
-    "url": "http://www.celestrak.com/NORAD/elements/galileo.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=galileo&FORMAT=tle"
   },
   {
     "name": "beidou",
     "label-pl": "Beidou",
     "label-en": "Beidou",
-    "url": "http://www.celestrak.com/NORAD/elements/beidou.txt"
+    "url": "https://celestrak.org/NORAD/elements/gp.php?GROUP=beidou&FORMAT=tle"
   }
 ]
