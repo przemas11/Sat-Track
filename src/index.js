@@ -48,11 +48,14 @@ const viewer = new Viewer('cesiumContainer', { //create viewer
 //API COLD START
 fetch("https://cors-noproblem.onrender.com/");
 
-//REMOVE BING IMAGERY
+//REMOVE BING AND MAPBOX IMAGERY
 const viewModel = viewer.baseLayerPicker.viewModel;
-viewModel.imageryProviderViewModels = viewModel.imageryProviderViewModels.filter((el) => {
-    return el.category !== "Cesium ion";
-});
+viewModel.imageryProviderViewModels =
+    viewModel.imageryProviderViewModels.filter((el) => {
+        return (
+            el.name.startsWith("ESRI") || el.name.startsWith("Open­Street­Map")
+        );
+    });
 viewModel.selectedImagery = viewModel.imageryProviderViewModels[0]; //select default imageryProvider
 
 const scene = viewer.scene;
